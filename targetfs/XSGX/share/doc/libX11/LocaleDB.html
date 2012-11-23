@@ -1,0 +1,1526 @@
+<!-- Creator     : groff version 1.18.1.4 -->
+<!-- CreationDate: Mon May 30 10:33:47 2011 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>X Locale Database Definition</title>
+</head>
+<body>
+
+<h1 align=center>X Locale Database Definition</h1>
+<a href="#1. General">1. General</a><br>
+<a href="#2. Database Format Definition">2. Database Format Definition</a><br>
+<a href="#3. Contents of Database">3. Contents of Database</a><br>
+<a href="#4. XLC_FONTSET Category">4. XLC_FONTSET Category</a><br>
+<a href="#5. XLC_XLOCALE Category">5. XLC_XLOCALE Category</a><br>
+<a href="#6. Sample of X Locale Database">6. Sample of X Locale Database</a><br>
+<a href="#7. Reference">7. Reference</a><br>
+
+<hr>
+
+<p><small>Copyright &copy; IBM Corporation 1994</small></p>
+
+<p><small>All Rights Reserved</small></p>
+
+<p><small>License to use, copy, modify, and distribute this
+software and its documentation for any purpose and without
+fee is hereby granted, provided that the above copyright
+notice appear in all copies and that both that copyright
+notice and this permission notice appear in supporting
+documentation, and that the name of IBM not be used in
+advertising or publicity pertaining to distribution of the
+software without specific, written prior
+permission.</small></p>
+
+<p><small>IBM DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS, AND NONINFRINGEMENT OF THIRD PARTY
+RIGHTS, IN NO EVENT SHALL IBM BE LIABLE FOR ANY SPECIAL,
+INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+OF THIS SOFTWARE.</small></p>
+
+<p><small>Copyright &copy; 1994 X Consortium</small></p>
+
+<p><small>Permission is hereby granted, free of charge, to
+any person obtaining a copy of this software and associated
+documentation files (the
+&lsquo;&lsquo;Software&rsquo;&rsquo;), to deal in the
+Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so,
+subject to the following conditions:</small></p>
+
+<p><small>The above copyright notice and this permission
+notice shall be included in all copies or substantial
+portions of the Software.</small></p>
+
+<p><small>THE SOFTWARE IS PROVIDED &lsquo;&lsquo;AS
+IS&rsquo;&rsquo;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE X CONSORTIUM BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</small></p>
+
+<p><small>Except as contained in this notice, the name of
+the X Consortium shall not be used in advertising or
+otherwise to promote the sale, use or other dealings in this
+Software without prior written authorization from the X
+Consortium.</small></p>
+
+<p><small><i>X Window System</i> is a trademark of The Open
+Group.</small></p>
+<a name="1. General"></a>
+<h2>1. General</h2>
+
+<p><small>An X Locale Database contains the subset of a
+user&rsquo;s environment that depends on language, in X
+Window System. It is made up from one or more categories.
+Each category consists of some classes and
+sub-classes.</small></p>
+
+<p><small>It is provided as a plain ASCII text file, so a
+user can change its contents easily. It allows a user to
+customize the behavior of internationalized portion of Xlib
+without changing Xlib itself.</small></p>
+
+<p><small>This document describes;</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Database Format Definition</small></p>
+<!-- INDENTATION -->
+<p><small>Contents of Database in sample
+implementation</small></p>
+</td>
+</table>
+
+<p><small>Since it is hard to define the set of required
+information for all platforms, only the flexible database
+format is defined. The available entries in database are
+implementation dependent.</small></p>
+<a name="2. Database Format Definition"></a>
+<h2>2. Database Format Definition</h2>
+
+<p><small>The X Locale Database contains one or more
+category definitions. This section describes the format of
+each category definition.</small></p>
+
+<p><small>The category definition consists of one or more
+class definitions. Each class definition has a pair of class
+name and class value, or has several subclasses which are
+enclosed by the left brace ({) and the right brace
+(}).</small></p>
+
+<p><small>Comments can be placed by using the number sign
+character (#). Putting the number sign character on the top
+of the line indicates that the entire line is comment. Also,
+putting any whitespace character followed by the number sign
+character indicates that a part of the line (from the number
+sign to the end of the line) is comment. A line can be
+continued by placing backslash (\) character as the last
+character on the line; this continuation character will be
+discarded from the input. Comment lines cannot be continued
+on a subsequent line using an escaped new line
+character.</small></p>
+
+<p><small>X Locale Database only accepts XPCS, the X
+Portable Character Set. The reserved symbols are; the
+quotation mark(&quot;), the number sign (#), the
+semicolon(;), the backslash(\), the left brace({) and the
+right brace(}).</small></p>
+
+<p><small>The format of category definition is;</small></p>
+
+
+<p align=center><small><img src="grohtml-324021.png"></small></p>
+
+<p><small>Elements separated by vertical bar (|) are
+alternatives. Curly braces ({...}) indicate zero or more
+repetitions of the enclosed elements. Square brackets
+([...]) indicate that the enclosed element is optional.
+Quotes (&quot;...&quot;) are used around literal
+characters.</small></p>
+
+<p><small>The backslash, which is not the top character of
+the NumericString, is recognized as an escape character, so
+that the next one character is treated as a literal
+character. For example, the two-character sequence,
+&lsquo;&lsquo;\&quot;&rsquo;&rsquo;(the backslash followed
+by the quotation mark) is recognized and replaced with a
+quotation mark character. Any whitespace character, that is
+not the Delimiter, unquoted and unescaped, is
+ignored.</small></p>
+<a name="3. Contents of Database"></a>
+<h2>3. Contents of Database</h2>
+
+<p><small>The available categories and classes depend on
+implementation, because different platform will require
+different information set. For example, some platform have
+system locale but some platform don&rsquo;t. Furthermore,
+there might be a difference in functionality even if the
+platform has system locale.</small></p>
+
+<p><small>In current sample implementation, categories
+listed below are available.</small></p>
+
+
+<p align=center><small><img src="grohtml-324022.png"></small></p>
+<a name="4. XLC_FONTSET Category"></a>
+<h2>4. XLC_FONTSET Category</h2>
+
+<p><small>The XLC_FONTSET category defines the XFontSet
+relative information. It contains the
+CHARSET_REGISTRY-CHARSET_ENCODING name and character mapping
+side (GL, GR, etc), and is used in Output Method
+(OM).</small></p>
+
+
+<p align=center><small><img src="grohtml-324023.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>fsN</small></p>
+</td>
+<td width="93%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Includes an encoding information for Nth charset,
+where N is the index number (0,1,2,...). If there are 4
+charsets available in current locale, 4 fontsets, fs0, fs1,
+fs2 and fs3, should be defined. This class has two
+subclasses, &lsquo;charset&rsquo; and
+&lsquo;font&rsquo;.</small></p>
+</td>
+</table>
+
+<p><small>charset</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies an encoding information to be used
+internally in Xlib for this fontset. The format of value
+is;</small></p>
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-324024.png"></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>For detail definition of
+CHARSET_REGISTRY-CHARSET_ENCODING, refer &quot;X Logical
+Font Descriptions&quot; document.</small></p>
+<!-- INDENTATION -->
+<p><small>example:<br>
+ISO8859-1:GL</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>font</small></p>
+</td>
+<td width="91%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a list of encoding information which is
+used for searching appropriate font for this fontset. The
+left most entry has highest priority.</small></p>
+</td>
+</table>
+<a name="5. XLC_XLOCALE Category"></a>
+<h2>5. XLC_XLOCALE Category</h2>
+
+<p><small>The XLC_XLOCALE category defines character
+classification, conversion and other character
+attributes.</small></p>
+
+
+<p align=center><small><img src="grohtml-324025.png"></small></p>
+
+<p><small>encoding_name</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a codeset name of current
+locale.</small></p>
+</td>
+</table>
+
+<p><small>mb_cur_max</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a maximum allowable number of bytes in a
+multi-byte character. It is corresponding to MB_CUR_MAX of
+&quot;ISO/IEC 9899:1990 C Language
+Standard&quot;.</small></p>
+</td>
+</table>
+
+<p><small>state_depend_encoding</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Indicates a current locale is state dependent. The
+value should be specified &quot;True&quot; or
+&quot;False&quot;.</small></p>
+</td>
+</table>
+
+<p><small>wc_encoding_mask</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a bit-mask for parsing wide-char string.
+Each wide character is applied bit-and operation with this
+bit-mask, then is classified into the unique charset, by
+using &lsquo;wc_encoding&rsquo;.</small></p>
+</td>
+</table>
+
+<p><small>wc_shift_bits</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a number of bit to be shifted for
+converting from a multi-byte character to a wide character,
+and vice-versa.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small>csN</small></p>
+</td>
+<td width="93%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Includes a character set information for Nth
+charset, where N is the index number (0,1,2,...). If there
+are 4 charsets available in current locale, cs0, cs1, cs2
+and cs3 should be defined. This class has five subclasses,
+&lsquo;side&rsquo;, &lsquo;length&rsquo;,
+&lsquo;mb_encoding&rsquo; &lsquo;wc_encoding&rsquo; and
+&lsquo;ct_encoding&rsquo;.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>side</small></p>
+</td>
+<td width="91%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a mapping side of this charset. The
+format of this value is;</small></p>
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-324026.png"></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The suffix &quot;:Default&quot; can be specified.
+It indicates that a character belongs to the specified side
+is mapped to this charset in initial state.</small></p>
+</td>
+</table>
+
+<p><small>length</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a number of bytes of a multi-byte
+character of this charset. It should not contain the length
+of any single-shift sequence.</small></p>
+</td>
+</table>
+
+<p><small>mb_encoding</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a list of shift sequence for parsing
+multi-byte string. The format of this value is;</small></p>
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-324027.png"></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>example:<br>
+&lt;LSL&gt; \x1b \x28 \x4a; &lt;LSL&gt; \x1b \x28
+\x42</small></p>
+</td>
+</table>
+
+<p><small>wc_encoding</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies an integer value for parsing wide-char
+string. It is used to determine the charset for each wide
+character, after applying bit-and operation using
+&lsquo;wc_encoding_mask&rsquo;. This value should be unique
+in all csN classes.</small></p>
+</td>
+</table>
+
+<p><small>ct_encoding</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>Specifies a list of encoding information that can
+be used for Compound Text.</small></p>
+</td>
+</table>
+<a name="6. Sample of X Locale Database"></a>
+<h2>6. Sample of X Locale Database</h2>
+
+<p><small>The following is sample X Locale Database
+file.</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<pre><small>#  $Xorg: LocaleDB.ms,v 1.3 2000/08/17 19:42:49 cpqbld Exp $
+#  XLocale Database Sample for ja_JP.euc
+#
+
+#
+</small></pre>
+</td>
+</table>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>XLC_FONTSET category</small></p>
+</td>
+<td width="69%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>#<br>
+XLC_FONTSET</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>fs0 class (7 bit ASCII)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>fs0</small></p>
+</td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>charset</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ISO8859-1:GL</small></p>
+</td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>font</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ISO8859-1:GL; JISX0201.1976-0:GL</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>}</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>fs1 class (Kanji)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>fs1</small></p>
+</td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>charset</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0208.1983-0:GL</small></p>
+</td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>font</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0208.1983-0:GL</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>}</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>fs2 class (Half Kana)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>fs2</small></p>
+</td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>charset</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0201.1976-0:GR</small></p>
+</td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>font</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0201.1976-0:GR</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>}</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>fs3 class (User Defined Character)</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small># fs3</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>charset</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0212.1990-0:GL</small></p>
+</td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>font</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0212.1990-0:GL</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small># }<br>
+END XLC_FONTSET</small></p>
+<!-- INDENTATION -->
+<p><small>#</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>XLC_XLOCALE category</small></p>
+</td>
+<td width="69%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>#<br>
+XLC_XLOCALE</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="8" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>encoding_name</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ja.euc</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>mb_cur_max</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>3</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>state_depend_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>False</small></p>
+</td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>wc_encoding_mask</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>\x00008080</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>wc_shift_bits</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>8</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>cs0 class</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>cs0</small></p>
+</td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>side</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>GL:Default</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>length</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>1</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>wc_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>\x00000000</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ct_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ISO8859-1:GL; JISX0201.1976-0:GL</small></p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>}</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="8" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>cs1 class</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>cs1</small></p>
+</td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>side</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>GR:Default</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>length</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>2</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>wc_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>\x00008080</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ct_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0208.1983-0:GL;
+JISX0208.1983-0:GR;\</small></p>
+</td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0208.1983-1:GL;
+JISX0208.1983-1:GR</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>}</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="8" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>cs2 class</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>cs2</small></p>
+</td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>side</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>GR</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>length</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>1</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>mb_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>&lt;SS&gt; \x8e</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>wc_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>\x00000080</small></p>
+</td>
+<td width="10%"></td>
+<td width="29%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>ct_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>JISX0201.1976-0:GR</small></p>
+</td>
+<td width="29%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>}</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="7" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>cs3 class</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small># cs3</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>{</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>side</small></p>
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>GL</small></p>
+</td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>length</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%">
+</td>
+<td width="10%">
+
+<p><small>2</small></p>
+</td>
+<td width="39%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>mb_encoding</small></p>
+</td>
+<td width="10%"></td>
+<td width="10%"></td>
+<td width="10%">
+
+<p><small>&lt;SS&gt; \x8f</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small># #if HasWChar32</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="6" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>wc_encoding</small></p>
+</td>
+<td width="20%"></td>
+<td width="10%">
+
+<p><small>\x20000000</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small># #else</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="6" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>wc_encoding</small></p>
+</td>
+<td width="20%"></td>
+<td width="10%">
+
+<p><small>\x00008000</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small># #endif</small></p></td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="6" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>#</small></p>
+</td>
+<td width="10%">
+
+<p><small>ct_encoding</small></p>
+</td>
+<td width="20%"></td>
+<td width="10%">
+
+<p><small>JISX0212.1990-0:GL;
+JISX0212.1990-0:GR</small></p>
+</td>
+<td width="39%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small># }</small></p>
+<!-- INDENTATION -->
+<p><small>END XLC_XLOCALE</small></p>
+</td>
+</table>
+<a name="7. Reference"></a>
+<h2>7. Reference</h2>
+
+<p><small>[1] <i>ISO/IEC 9899:1990 C Language
+Standard</i></small></p>
+
+<p><small>[2] <i>X Logical Font
+Descriptions</i></small></p>
+
+<p><small><b>1</b></small></p>
+<hr>
+</body>
+</html>

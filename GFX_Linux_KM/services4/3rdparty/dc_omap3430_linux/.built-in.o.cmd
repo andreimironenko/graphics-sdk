@@ -1,0 +1,1 @@
+cmd_/home1/prathap/release/Graphics_SDK_4_03_00_02/GFX_Linux_KM/services4/3rdparty/dc_omap3430_linux/built-in.o :=  rm -f /home1/prathap/release/Graphics_SDK_4_03_00_02/GFX_Linux_KM/services4/3rdparty/dc_omap3430_linux/built-in.o; arm-none-linux-gnueabi-ar rcs /home1/prathap/release/Graphics_SDK_4_03_00_02/GFX_Linux_KM/services4/3rdparty/dc_omap3430_linux/built-in.o

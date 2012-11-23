@@ -1,0 +1,1777 @@
+<!-- Creator     : groff version 1.18.1.4 -->
+<!-- CreationDate: Mon May 30 10:33:48 2011 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>The XIM Transport Specification</title>
+</head>
+<body>
+
+<h1 align=center>The XIM Transport Specification</h1>
+<a href="#1. Introduction">1. Introduction</a><br>
+<a href="#2. Initialization">2. Initialization</a><br>
+<a href="#2.1. Registering structure to initialize">2.1. Registering structure to initialize</a><br>
+<a href="#2.2. Initialization function">2.2. Initialization function</a><br>
+<a href="#3. The interface/transport layer functions">3. The interface/transport layer functions</a><br>
+<a href="#3.1. Opening connection">3.1. Opening connection</a><br>
+<a href="#3.2. Closing connection">3.2. Closing connection</a><br>
+<a href="#3.3. Writing data">3.3. Writing data</a><br>
+<a href="#3.4. Reading data">3.4. Reading data</a><br>
+<a href="#3.5. Flushing buffer">3.5. Flushing buffer</a><br>
+<a href="#3.6. Registering asynchronous data handler">3.6. Registering asynchronous data handler</a><br>
+<a href="#3.7. Calling dispatcher">3.7. Calling dispatcher</a><br>
+<a href="#4. Sample implementations for the Transport Layer">4. Sample implementations for the Transport Layer</a><br>
+<a href="#4.1. X Transport">4.1. X Transport</a><br>
+<a href="#4.1.1. Connection">4.1.1. Connection</a><br>
+<a href="#4.1.2. read/write">4.1.2. read/write</a><br>
+<a href="#4.1.2.1. Format for the data from the Client to the IM Server">4.1.2.1. Format for the data from the Client to the IM Server</a><br>
+<a href="#4.1.2.2. Format for the data from the IM Server to the Client">4.1.2.2. Format for the data from the IM Server to the Client</a><br>
+<a href="#4.1.3. Closing Connection">4.1.3. Closing Connection</a><br>
+<a href="#5. References">5. References</a><br>
+
+<hr>
+
+<p><b><small>Revision 0.1</small></b></p>
+
+<p><b><small>X Version 11, Release 7</small></b></p>
+
+<p><b><small>libX11 1.3.2</small></b></p>
+
+
+<p align=center><small><i><small>ABSTRACT</small></i></small></p>
+
+<p align=center><small><i><small>Takashi
+Fujiwara</small></i><small><br>
+FUJITSU LIMITED</small></small></p>
+
+<p><small><small>This specification describes the transport
+layer interfaces between Xlib and IM Server, which makes
+various channels usable such as X protocol or, TCP/IP,
+DECnet and etc.</small></small></p>
+
+<p><small>Copyright &copy; 1994 by FUJITSU
+LIMITED</small></p>
+
+<p><small>Permission to use, copy, modify, and distribute
+this documentation for any purpose and without fee is hereby
+granted, provided that the above copyright notice and this
+permission notice appear in all copies. Fujitsu makes no
+representations about the suitability for any purpose of the
+information in this document. This documentation is provided
+as is without express or implied warranty.</small></p>
+
+<p><small>Copyright &copy; 1994 X Consortium</small></p>
+
+<p><small>Permission is hereby granted, free of charge, to
+any person obtaining a copy of this software and associated
+documentation files (the
+&lsquo;&lsquo;Software&rsquo;&rsquo;), to deal in the
+Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so,
+subject to the following conditions:</small></p>
+
+<p><small>The above copyright notice and this permission
+notice shall be included in all copies or substantial
+portions of the Software.</small></p>
+
+<p><small>THE SOFTWARE IS PROVIDED &lsquo;&lsquo;AS
+IS&rsquo;&rsquo;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE X CONSORTIUM BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</small></p>
+
+<p><small>Except as contained in this notice, the name of
+the X Consortium shall not be used in advertising or
+otherwise to promote the sale, use or other dealings in this
+Software without prior written authorization from the X
+Consortium.</small></p>
+
+<p><small><i>X Window System</i> is a trademark of The Open
+Group.</small></p>
+<a name="1. Introduction"></a>
+<h2>1. Introduction</h2>
+
+<p><small>The Xlib XIM implementation is layered into three
+functions, a protocol layer, an interface layer and a
+transport layer. The purpose of this layering is to make the
+protocol independent of transport implementation. Each
+function of these layers are:</small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small><i>The protocol layer</i></small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>implements overall function of XIM and calls the
+interface layer functions when it needs to communicate to IM
+Server.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small><i>The interface layer</i></small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>separates the implementation of the transport
+layer from the protocol layer, in other words, it provides
+implementation independent hook for the transport layer
+functions.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small><i>The transport layer</i></small></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>handles actual data communication with IM Server.
+It is done by a set of several functions named
+transporters.</small></p>
+</td>
+</table>
+
+<p><small>This specification describes the interface layer
+and the transport layer, which makes various communication
+channels usable such as X protocol or, TCP/IP, DECnet,
+STREAM, etc., and provides the information needed for adding
+another new transport layer. In addition, sample
+implementations for the transporter using the X connection
+is described in section 4.</small></p>
+<a name="2. Initialization"></a>
+<h2>2. Initialization</h2>
+<a name="2.1. Registering structure to initialize"></a>
+<h2>2.1. Registering structure to initialize</h2>
+
+<p><small>The structure typed as TransportSW contains the
+list of the transport layer the specific implementations
+supports.</small></p>
+<pre><small>typedef struct {
+      char *transport_name;
+      Bool (*config);
+} TransportSW;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="28%">
+
+<p><small><i>transport_name</i></small></p>
+</td>
+<td width="2%"></td>
+<td width="42%">
+
+<p><small>name of transport(*1)</small></p>
+</td>
+<td width="27%">
+</td>
+</table>
+
+
+<p align=center><small><img src="grohtml-324161.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="12%">
+
+<p><small><i>config</i></small></p>
+</td>
+<td width="18%"></td>
+<td width="60%">
+
+<p><small>initial configuration function</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+
+<p><small>A sample entry for the Xlib supporting
+transporters is shown below:</small></p>
+<pre><small>TransportSW _XimTransportRec[] = {
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%">
+
+<p><small>/*</small></p>
+</td>
+<td width="40%">
+
+<p><small>char <i>*:</i></small></p>
+</td>
+<td width="50%">
+</td>
+<tr valign="top" align="left">
+<td width="10%">
+
+<p><small><i>*</i></small></p>
+</td>
+<td width="40%">
+
+<p><small><i>transport_name</i>,</small></p>
+</td>
+<td width="50%">
+
+<p><small>Bool <i>(*config)()</i></small></p>
+</td>
+</table>
+
+<p><small>*/</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="40%">
+
+<p><small>&lsquo;&lsquo;X&rsquo;&rsquo;,</small></p>
+</td>
+<td width="50%">
+
+<p><small>_XimXConf,</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="40%">
+
+<p><small>&lsquo;&lsquo;tcp&rsquo;&rsquo;,</small></p>
+</td>
+<td width="50%">
+
+<p><small>_XimTransConf,</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="40%">
+
+<p><small>&lsquo;&lsquo;local&rsquo;&rsquo;,</small></p>
+</td>
+<td width="50%">
+
+<p><small>_XimTransConf,</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="40%">
+
+<p><small>&lsquo;&lsquo;decnet&rsquo;&rsquo;,</small></p>
+</td>
+<td width="50%">
+
+<p><small>_XimTransConf,</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="40%">
+
+<p><small>&lsquo;&lsquo;streams&rsquo;&rsquo;,</small></p>
+</td>
+<td width="50%">
+
+<p><small>_XimTransConf,</small></p>
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="40%">
+
+<p><small>(char *)NULL,</small></p>
+</td>
+<td width="50%">
+
+<p><small>(Bool (*)())NULL,</small></p>
+</td>
+</table>
+
+<p><small>};</small></p>
+<a name="2.2. Initialization function"></a>
+<h2>2.2. Initialization function</h2>
+
+<p><small>The following function will be called once when
+Xlib configures the transporter functions.</small></p>
+<pre><small>Bool (*config)(<i>im</i>, <i>transport_data</i>)
+      XIM <i>im</i>;
+      char <i>*transport_data</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+
+<p><small><i>transport_data</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Specifies the data specific to the transporter, in
+IM Server address. (*1)</small></p></td>
+</table>
+
+
+<p align=center><small><img src="grohtml-324162.png"></small></p>
+
+<p><small>This function must setup the transporter function
+pointers.</small></p>
+
+<p><small>The actual <i>config</i> function will be chosen
+by IM Server at the pre-connection time, matching by the
+<i>transport_name</i> specified in the
+<b>_XimTransportRec</b> array; The specific members of
+XimProto structure listed below must be initialized so that
+point they appropriate transporter functions.</small></p>
+
+<p><small>If the specified transporter has been configured
+successfully, this function returns True. There is no
+Alternative Entry for config function itself.</small></p>
+
+<p><small>The structure XimProto contains the following
+function pointers:</small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+
+<p><small>Bool (*connect)();</small></p>
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>/* Open connection */<br>
+Bool (*shutdown)();</small></p>
+</td>
+<td width="40%"></td>
+<td width="40%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>/* Close connection */<br>
+Bool (*write)();</small></p>
+</td>
+<td width="40%"></td>
+<td width="40%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>/* Write data */<br>
+Bool (*read)();</small></p>
+</td>
+<td width="40%"></td>
+<td width="40%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>/* Read data */<br>
+Bool (*flush)();</small></p>
+</td>
+<td width="40%"></td>
+<td width="40%">
+</td>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="10%">
+
+<p><small>/* Flush data buffer */</small></p>
+</td>
+<td width="40%"></td>
+<td width="40%">
+</td>
+</table>
+
+<p><small>Bool (*register_dispatcher)();/* Register
+asynchronous data handler */<br>
+Bool (*call_dispatcher)();/* Call dispatcher */</small></p>
+
+<p><small>These functions are called when Xlib needs to
+communicate the IM Server. These functions must process the
+appropriate procedure described below.</small></p>
+<a name="3. The interface/transport layer functions"></a>
+<h2>3. The interface/transport layer functions</h2>
+
+<p><small>Following functions are used for the transport
+interface.</small></p>
+
+<p align=center><small>Table 3-1; The Transport Layer
+Functions.</small></p>
+
+
+<p align=center><small><img src="grohtml-324163.png"></small></p>
+
+<p><small>The Protocol layer calls the above functions
+using the Alternative Entry in the left column. The
+transport implementation defines XimProto member function in
+the right column. The Alternative Entry is provided so as to
+make easier to implement the Protocol Layer.</small></p>
+<a name="3.1. Opening connection"></a>
+<h2>3.1. Opening connection</h2>
+
+<p><small>When <b>XOpenIM</b> is called, the following
+function is called to connect with the IM
+Server.</small></p>
+<pre><small>Bool (*connect)(<i>im</i>)
+      XIM <i>im</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+
+<p><small>This function must establishes the connection to
+the IM Server. If the connection is established
+successfully, this function returns True. The Alternative
+Entry for this function is:</small></p>
+<pre><small>Bool _XimConnect(<i>im</i>)
+      XIM <i>im</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<a name="3.2. Closing connection"></a>
+<h2>3.2. Closing connection</h2>
+
+<p><small>When <b>XCloseIM</b> is called, the following
+function is called to disconnect the connection with the IM
+Server. The Alternative Entry for this function
+is:</small></p>
+<pre><small>Bool (*shutdown)(<i>im</i>)
+      XIM <i>im</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+
+<p><small>This function must close connection with the IM
+Server. If the connection is closed successfully, this
+function returns True. The Alternative Entry for this
+function is:</small></p>
+<pre><small>Bool _XimShutdown(<i>im</i>)
+      XIM <i>im</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="6%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<a name="3.3. Writing data"></a>
+<h2>3.3. Writing data</h2>
+
+<p><small>The following function is called, when Xlib needs
+to write data to the IM Server.</small></p>
+<pre><small>Bool (*write)(<i>im</i>, <i>len</i>, <i>data</i>)
+      XIM <i>im</i>;
+      INT16 <i>len</i>;
+      XPointer <i>data</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><i>len</i></small></p>
+</td>
+<td width="14%"></td>
+<td width="74%">
+
+<p><small>Specifies the length of writing data.</small></p>
+</td>
+<td width="5%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>data</i></small></p>
+</td>
+<td width="12%"></td>
+<td width="54%">
+
+<p><small>Specifies the writing data.</small></p>
+</td>
+<td width="25%">
+</td>
+</table>
+
+<p><small>This function writes the <i>data</i> to the IM
+Server, regardless of the contents. The number of bytes is
+passed to <i>len</i>. The writing data is passed to
+<i>data</i>. If data is sent successfully, the function
+returns True. Refer to &quot;The Input Method Protocol&quot;
+for the contents of the writing data. The Alternative Entry
+for this function is:</small></p>
+<pre><small>Bool _XimWrite(<i>im</i>, <i>len</i>, <i>data</i>)
+      XIM <i>im</i>;
+      INT16 <i>len</i>;
+      XPointer <i>data</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><i>len</i></small></p>
+</td>
+<td width="14%"></td>
+<td width="74%">
+
+<p><small>Specifies the length of writing data.</small></p>
+</td>
+<td width="5%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>data</i></small></p>
+</td>
+<td width="12%"></td>
+<td width="54%">
+
+<p><small>Specifies the writing data.</small></p>
+</td>
+<td width="25%">
+</td>
+</table>
+<a name="3.4. Reading data"></a>
+<h2>3.4. Reading data</h2>
+
+<p><small>The following function is called when Xlib waits
+for response from IM server synchronously.</small></p>
+<pre><small>Bool (*read)(<i>im</i>, <i>read_buf</i>, <i>buf_len</i>, <i>ret_len</i>)
+      XIM <i>im</i>;
+      XPointer <i>read_buf</i>;
+      int <i>buf_len</i>;
+      int <i>*ret_len</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="16%">
+
+<p><small><i>read_buf</i></small></p>
+</td>
+<td width="4%"></td>
+<td width="70%">
+
+<p><small>Specifies the buffer to store data.</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small><i>buf_len</i></small></p>
+</td>
+<td width="6%"></td>
+<td width="64%">
+
+<p><small>Specifies the size of the
+<i>buffer</i></small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small><i>ret_len</i></small></p>
+</td>
+<td width="6%"></td>
+<td width="72%">
+
+<p><small>Specifies the length of stored data.</small></p>
+</td>
+<td width="7%">
+</td>
+</table>
+
+<p><small>This function stores the read data in
+<i>read_buf</i>, which size is specified as <i>buf_len</i>.
+The size of data is set to <i>ret_len</i>. This function
+return True, if the data is read normally or reading data is
+completed.</small></p>
+
+<p><small>The Alternative Entry for this function
+is:</small></p>
+<pre><small>Bool _XimRead(<i>im</i>, <i>ret_len</i>, <i>buf</i>, <i>buf_len</i>, <i>predicate</i>, <i>predicate_arg</i>)
+      XIM <i>im</i>;
+      INT16 <i>*ret_len</i>;
+      XPointer <i>buf</i>;
+      int <i>buf_len</i>;
+      Bool <i>(*predicate)()</i>;
+      XPointer <i>predicate_arg</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small><i>ret_len</i></small></p>
+</td>
+<td width="6%"></td>
+<td width="76%">
+
+<p><small>Specifies the size of the <i>data</i>
+buffer.</small></p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><i>buf</i></small></p>
+</td>
+<td width="14%"></td>
+<td width="70%">
+
+<p><small>Specifies the buffer to store data.</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="14%">
+
+<p><small><i>buf_len</i></small></p>
+</td>
+<td width="6%"></td>
+<td width="62%">
+
+<p><small>Specifies the length of
+<i>buffer</i>.</small></p>
+</td>
+<td width="17%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small><i>predicate</i></small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>Specifies the predicate for the XIM
+data.</small></p>
+</td>
+</table>
+
+<p><small><i>predicate_arg</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Specifies the predicate specific data.</small></p>
+</td>
+</table>
+
+<p><small>The predicate procedure indicates whether the
+<i>data</i> is for the XIM or not. <i>len</i> This function
+stores the read data in <i>buf</i>, which size is specified
+as <i>buf_len</i>. The size of data is set to
+<i>ret_len</i>. If <i>preedicate()</i> returns True, this
+function returns True. If not, it calls the registered
+callback function.</small></p>
+
+<p><small>The procedure and its arguments are:</small></p>
+<pre><small>Bool (*predicate)(<i>im</i>, <i>len</i>, <i>data</i>, <i>predicate_arg</i>)
+      XIM <i>im</i>;
+      INT16 <i>len</i>;
+      XPointer <i>data</i>;
+      XPointer <i>predicate_arg</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><i>len</i></small></p>
+</td>
+<td width="14%"></td>
+<td width="76%">
+
+<p><small>Specifies the size of the <i>data</i>
+buffer.</small></p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>data</i></small></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p><small>Specifies the buffer to store data.</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+
+<p><small><i>predicate_arg</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Specifies the predicate specific data.</small></p>
+</td>
+</table>
+<a name="3.5. Flushing buffer"></a>
+<h2>3.5. Flushing buffer</h2>
+
+<p><small>The following function is called when Xlib needs
+to flush the data.</small></p>
+<pre><small>void (*flush)(<i>im</i>)
+      XIM <i>im</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+
+<p><small>This function must flush the data stored in
+internal buffer on the transport layer. If data transfer is
+completed, the function returns True. The Alternative Entry
+for this function is:</small></p>
+<pre><small>void _XimFlush(<i>im</i>)
+      XIM <i>im</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<a name="3.6. Registering asynchronous data handler"></a>
+<h2>3.6. Registering asynchronous data handler</h2>
+
+<p><small>Xlib needs to handle asynchronous response from
+IM Server. This is because some of the XIM data occur
+asynchronously to X events.</small></p>
+
+<p><small>Those data will be handled in the <i>Filter</i>,
+and the <i>Filter</i> will call asynchronous data handler in
+the protocol layer. Then it calls dispatchers in the
+transport layer. The dispatchers are implemented by the
+protocol layer. This function must store the information and
+prepare for later call of the dispatchers using
+<b>_XimCallDispatcher</b>.</small></p>
+
+<p><small>When multiple dispatchers are registered, they
+will be called sequentially in order of registration, on
+arrival of asynchronous data. The register_dispatcher is
+declared as following:</small></p>
+<pre><small>Bool (*register_dispatcher)(<i>im</i>, <i>dispatcher</i>, <i>call_data</i>)
+      XIM <i>im</i>;
+      Bool <i>(*dispatcher)()</i>;
+      XPointer <i>call_data</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+
+<p><small><i>dispatcher</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Specifies the dispatcher function to
+register.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small><i>call_data</i></small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>Specifies a parameter for the
+<i>dispatcher</i>.</small></p>
+</td>
+</table>
+
+<p><small>The dispatcher is a function of the following
+type:</small></p>
+<pre><small>Bool (*dispatcher)(<i>im</i>, <i>len</i>, <i>data</i>, <i>call_data</i>)
+      XIM <i>im</i>;
+      INT16 <i>len</i>;
+      XPointer <i>data</i>;
+      XPointer <i>call_data</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><i>len</i></small></p>
+</td>
+<td width="14%"></td>
+<td width="76%">
+
+<p><small>Specifies the size of the <i>data</i>
+buffer.</small></p>
+</td>
+<td width="3%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>data</i></small></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p><small>Specifies the buffer to store data.</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small><i>call_data</i></small></p>
+</td>
+<td width="2%"></td>
+<td width="70%">
+
+<p><small>Specifies a parameter passed to the
+register_dispatcher.</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+
+<p><small>The dispatcher is provided by the protocol layer.
+They are called once for every asynchronous data, in order
+of registration. If the data is used, it must return True.
+otherwise, it must return False.</small></p>
+
+<p><small>If the dispatcher function returns True, the
+Transport Layer assume that the data has been processed by
+the upper layer. The Alternative Entry for this function
+is:</small></p>
+<pre><small>Bool _XimRegisterDispatcher(<i>im</i>, <i>dispatcher</i>, <i>call_data</i>)
+      XIM <i>im</i>;
+      Bool <i>(*dispatcher)()</i>;
+      XPointer <i>call_data</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+
+<p><small><i>dispatcher</i></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>Specifies the dispatcher function to
+register.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="18%">
+
+<p><small><i>call_data</i></small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>Specifies a parameter for the
+<i>dispatcher</i>.</small></p>
+</td>
+</table>
+<a name="3.7. Calling dispatcher"></a>
+<h2>3.7. Calling dispatcher</h2>
+
+<p><small>The following function is used to call the
+registered dispatcher function, when the asynchronous
+response from IM Server has arrived.</small></p>
+<pre><small>Bool (*call_dispatcher)(<i>im</i>, <i>len</i>, <i>data</i>)
+      XIM <i>im</i>;
+      INT16 <i>len</i>;
+      XPointer <i>data</i>;
+</small></pre>
+<!-- TABS -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="4%">
+
+<p><small><i>im</i></small></p>
+</td>
+<td width="16%"></td>
+<td width="64%">
+
+<p><small>Specifies XIM structure address.</small></p>
+</td>
+<td width="15%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="6%">
+
+<p><small><i>len</i></small></p>
+</td>
+<td width="14%"></td>
+<td width="68%">
+
+<p><small>Specifies the size of <i>data</i>
+buffer.</small></p>
+</td>
+<td width="11%">
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small><i>data</i></small></p>
+</td>
+<td width="12%"></td>
+<td width="70%">
+
+<p><small>Specifies the buffer to store data.</small></p>
+</td>
+<td width="9%">
+</td>
+</table>
+
+<p><small>The call_dispatcher must call the dispatcher
+function, in order of their registration. <i>len</i> and
+<i>data</i> are the data passed to
+register_dispatcher.</small></p>
+
+<p><small>The return values are checked at each invocation,
+and if it finds True, it immediately return with true for
+its return value.</small></p>
+
+<p><small>It is depend on the upper layer whether the read
+data is XIM Protocol packet unit or not. The Alternative
+Entry for this function is:</small></p>
+<pre><small>Bool _XimCallDispatcher(<i>im</i>, <i>len</i>, <i>data</i>)
+      XIM <i>im</i>;
+      INT16 <i>len</i>;
+      XPointer <i>call_data</i>;
+</small></pre>
+
+<p><small><b>1</b></small></p>
+
+<p><b><small>XIM Transport Specification libX11
+1.3.2</small></b></p>
+<a name="4. Sample implementations for the Transport Layer"></a>
+<h2>4. Sample implementations for the Transport Layer</h2>
+
+<p><small>Sample implementations for the transporter using
+the X connection is described here.</small></p>
+<a name="4.1. X Transport"></a>
+<h2>4.1. X Transport</h2>
+
+<p><small>At the beginning of the X Transport connection
+for the XIM transport mechanism, two different windows must
+be created either in an Xlib XIM or in an IM Server, with
+which the Xlib and the IM Server exchange the XIM transports
+by using the ClientMessage events and Window Properties. In
+the following, the window created by the Xlib is referred as
+the &quot;client communication window&quot;, and on the
+other hand, the window created by the IM Server is referred
+as the &quot;IMS communication window&quot;.</small></p>
+<a name="4.1.1. Connection"></a>
+<h2>4.1.1. Connection</h2>
+
+<p><small>In order to establish a connection, a
+communication window is created. A ClientMessage in the
+following event&rsquo;s format is sent to the owner window
+of XIM_SERVER selection, which the IM Server has
+created.</small></p>
+
+<p><small>Refer to &quot;The Input Method Protocol&quot;
+for the XIM_SERVER atom.</small></p>
+
+<p align=center><small>Table 4-1; The ClientMessage sent to
+the IMS window.</small></p>
+
+
+<p align=center><small><img src="grohtml-324164.png"></small></p>
+
+<p><small>In order to establish the connection (to notify
+the IM Server communication window), the IM Server sends a
+ClientMessage in the following event&rsquo;s format to the
+client communication window.</small></p>
+
+<p align=center><small>Table 4-2; The ClientMessage sent by
+IM Server.</small></p>
+
+
+<p align=center><small><img src="grohtml-324165.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>(*1)</small></p>
+</td>
+<td width="2%"></td>
+<td width="58%">
+
+<p><small>major/minor-transport-version</small></p>
+</td>
+<td width="31%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>The read/write method is decided by the
+combination of major/minor-transport-version, as
+follows:</small></p>
+</td>
+</table>
+
+<p align=center><small>Table 4-3; The read/write method and
+the major/minor-transport-version</small></p>
+
+
+<p align=center><small><img src="grohtml-324166.png"></small></p>
+
+
+<p align=center><small><img src="grohtml-324167.png"></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The method to decide major/minor-transport-version
+is as follows:</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p><small>(1)</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>The client sends 0 as
+major/minor-transport-version to the IM Server. The client
+must support all methods in Table 4-3. The client may send
+another number as major/minor-transport-version to use other
+method than the above in the future.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p><small>(2)</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>The IM Server sends its
+major/minor-transport-version number to the client. The
+client sends data using the method specified by the IM
+Server.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p><small>(3)</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>If major/minor-transport-version number is not
+available, it is regarded as 0.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="8%">
+
+<p><small>(*2)</small></p>
+</td>
+<td width="2%"></td>
+<td width="90%">
+
+<p><small>dividing size between ClientMessage and
+Property</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="19%"></td>
+<td width="80%">
+<p><small>If data is sent via both of multi-CM and Property,
+specify the dividing size between ClientMessage and
+Property. The data, which is smaller than this size, is sent
+via multi-CM (or only-CM), and the data, which is lager than
+this size, is sent via Property.</small></p>
+</td>
+</table>
+<a name="4.1.2. read/write"></a>
+<h2>4.1.2. read/write</h2>
+
+<p><small>The data is transferred via either ClientMessage
+or Window Property in the X Window System.</small></p>
+<a name="4.1.2.1. Format for the data from the Client to the IM Server"></a>
+<h2>4.1.2.1. Format for the data from the Client to the IM Server</h2>
+
+<p><small><b>ClientMessage</b></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>If data is sent via ClientMessage event, the
+format is as follows:</small></p>
+</td>
+</table>
+
+<p align=center><small>Table 4-4; The ClientMessage
+event&rsquo;s format (first or middle)</small></p>
+
+
+<p align=center><small><img src="grohtml-324168.png"></small></p>
+
+<p align=center><small>Table 4-5; The ClientMessage
+event&rsquo;s format (only or last)</small></p>
+
+
+<p align=center><small><img src="grohtml-324169.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="8%">
+
+<p><small>(*1)</small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>If the data is smaller than 20 byte, all data
+other than available data must be 0.</small></p>
+</td>
+</table>
+
+<p><small><b>Property</b></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>In the case of large data, data will be sent via
+the Window Property for the efficiency. There are the
+following two methods to notify Property, and
+transport-version is decided which method is
+used.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p><small>(1)</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>The XChangeProperty function is used to store
+data in the client communication window, and Atom of the
+stored data is notified to the IM Server via ClientMessage
+event.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p><small>(2)</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>The XChangeProperty function is used to store
+data in the client communication window, and Atom of the
+stored data is notified to the IM Server via PropertyNotify
+event.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The arguments of the XChangeProperty are as
+follows:</small></p>
+</td>
+</table>
+
+<p align=center><small>Table 4-6; The XChangeProperty
+event&rsquo;s format</small></p>
+
+
+<p align=center><small><img src="grohtml-3241610.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="8%">
+
+<p><small>(*1)</small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>The read/write property ATOM allocates the
+following strings by <b>XInternAtom</b>.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="29%"></td>
+<td width="70%">
+
+<p><small>&lsquo;&lsquo;_clientXXX&rsquo;&rsquo;</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The client changes the property with the mode of
+PropModeAppend and the IM Server will read it with the
+delete mode i.e. (delete = True).</small></p>
+<!-- INDENTATION -->
+<p><small>If Atom is notified via ClientMessage event, the
+format of the ClientMessage is as follows:</small></p>
+</td>
+</table>
+
+<p align=center><small>Table 4-7; The ClientMessage
+event&rsquo;s format to send Atom of property</small></p>
+
+
+<p align=center><small><img src="grohtml-3241611.png"></small></p>
+<a name="4.1.2.2. Format for the data from the IM Server to the Client"></a>
+<h2>4.1.2.2. Format for the data from the IM Server to the Client</h2>
+
+<p><small><b>ClientMessage</b></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The format of the ClientMessage is as
+follows:</small></p>
+</td>
+</table>
+
+<p align=center><small>Table 4-8; The ClientMessage
+event&rsquo;s format (first or middle)</small></p>
+
+
+<p align=center><small><img src="grohtml-3241612.png"></small></p>
+
+<p align=center><small>Table 4-9; The ClientMessage
+event&rsquo;s format (only or last)</small></p>
+
+
+<p align=center><small><img src="grohtml-3241613.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="8%">
+
+<p><small>(*1)</small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>If the data size is smaller than 20 bytes, all
+data other than available data must be 0.</small></p>
+</td>
+</table>
+
+<p><small><b>Property</b></small></p>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>In the case of large data, data will be sent via
+the Window Property for the efficiency. There are the
+following two methods to notify Property, and
+transport-version is decided which method is
+used.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p><small>(1)</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>The XChangeProperty function is used to store
+data in the IMS communication window, and Atom of the
+property is sent via the ClientMessage event.</small></p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+<p><small>(2)</small></p>
+</td>
+<td width="4%"></td>
+<td width="80%">
+
+<p><small>The XChangeProperty function is used to store
+data in the IMS communication window, and Atom of the
+property is sent via PropertyNotify event.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The arguments of the XChangeProperty are as
+follows:</small></p>
+</td>
+</table>
+
+<p align=center><small>Table 4-10; The XChangeProperty
+event&rsquo;s format</small></p>
+
+
+<p align=center><small><img src="grohtml-3241614.png"></small></p>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="4" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="8%">
+
+<p><small>(*1)</small></p>
+</td>
+<td width="2%"></td>
+<td width="80%">
+
+<p><small>The read/write property ATOM allocates some
+strings, which are not allocated by the client, by
+<b>XInternAtom</b>.</small></p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="90%">
+<p><small>The IM Server changes the property with the mode
+of PropModeAppend and the client reads it with the delete
+mode, i.e. (delete = True).</small></p>
+<!-- INDENTATION -->
+<p><small>If Atom is notified via ClientMessage event, the
+format of the ClientMessage is as follows:</small></p>
+</td>
+</table>
+
+<p align=center><small>Table 4-11; The ClientMessage
+event&rsquo;s format to send Atom of property</small></p>
+
+
+<p align=center><small><img src="grohtml-3241615.png"></small></p>
+<a name="4.1.3. Closing Connection"></a>
+<h2>4.1.3. Closing Connection</h2>
+
+<p><small>If the client disconnect with the IM Server,
+shutdown function should free the communication window
+properties and etc..</small></p>
+<a name="5. References"></a>
+<h2>5. References</h2>
+
+<p><small>[1] Masahiko Narita and Hideki Hiura,
+<i>&lsquo;&lsquo;The Input Method
+Protocol&rsquo;&rsquo;</i></small></p>
+
+<p><small><b>2</b></small></p>
+<hr>
+</body>
+</html>
