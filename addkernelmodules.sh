@@ -4,7 +4,9 @@
 cd $1
 
 #install the kernel modules
-make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- INSTALL_MOD_PATH=$2 modules_install
+#make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- INSTALL_MOD_PATH=$2 modules_install
+
+make ARCH=arm CROSS_COMPILE=$CSTOOL_PREFIX INSTALL_MOD_PATH=$2 modules_install
 
 #Now done in target
 #add the kernel modules to modules.dep
