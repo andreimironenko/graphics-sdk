@@ -6,26 +6,26 @@
 HOME=/proj/SGX_Graphics/releases/sdk
 
 # Set installation folder (typically, OMAP35x_Graphics_***)
-GRAPHICS_INSTALL_DIR=$(HOME)/Graphics_SDK_4_04_00_02
+GRAPHICS_INSTALL_DIR?=$(HOME)/Graphics_SDK_4_04_00_02
 
 # Location of demo executables and install information
 GFX_DEMOS_EXECPATH=$(GRAPHICS_INSTALL_DIR)/gfxsdkdemos
 
 # Toolchain path
-CSTOOL_DIR=/proj/AVME10/mahesh/Graphics/toolchain/arm-2009q1
+CSTOOL_DIR?=/proj/AVME10/mahesh/Graphics/toolchain/arm-2009q1
 #CSTOOL_DIR=/proj/productization/workdir/mahesh/toolchain/Sourcery_G++_Lite/bin
-CSTOOL_PREFIX=arm-none-linux-gnueabi-
-CSTOOL_PATH=$(CSTOOL_DIR)/bin
-CSTOOL_LIBSTDC++_PATH=$(CSTOOL_DIR)/arm-none-linux-gnueabi/libc/usr/lib
+CSTOOL_PREFIX?=arm-none-linux-gnueabi-
+CSTOOL_PATH=?$(CSTOOL_DIR)/bin
+CSTOOL_LIBSTDC++_PATH?=$(CSTOOL_DIR)/arm-none-linux-gnueabi/libc/usr/lib
 
 # Set the kernel installation path
 #KERNEL_INSTALL_DIR=/proj/productization/workdir/mahesh/linux/AM45X/linux-am45x
 #KERNEL_INSTALL_DIR=/proj/SGX_Graphics/prathap/centaurus/TI814X-LINUX-PSP-04.01.00.05/src/kernel/linux-04.01.00.05
 #KERNEL_INSTALL_DIR=/proj/SGX_Graphics/prathap/omap3-kernel/AM35x-OMAP35x-LINUX-PSP-04.02.00.07/src/kernel/linux-04.02.00.07
-KERNEL_INSTALL_DIR=/proj/productization/workdir/mahesh/linux/TI816X-LINUX-PSP-04.00.00.12/src/kernel/linux-04.00.00.12
+KERNEL_INSTALL_DIR?=/proj/productization/workdir/mahesh/linux/TI816X-LINUX-PSP-04.00.00.12/src/kernel/linux-04.00.00.12
 # Target NFS root file system location
 #TARGETFS_INSTALL_DIR=/home/netrauser/groups/psp/nfs_prathap
-TARGETFS_INSTALL_DIR=/home/a0756700/nfs/ea2
+TARGETFS_INSTALL_DIR?=/home/a0756700/nfs/ea2
 
 ######################### PRE-DEFINED VARIABLES ###############################
 ######################## NOT MODIFIABLE BY USER ###############################
