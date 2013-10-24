@@ -4,7 +4,7 @@
 
 TARGETFSDIR  = ../../targetfs/
 
-CROSS_COMPILE=arm-none-linux-gnueabi-
+CROSS_COMPILE ?= arm-none-linux-gnueabi-
 
 PLAT_CC  = $(CROSS_COMPILE)gcc
 PLAT_CPP = $(CROSS_COMPILE)g++
